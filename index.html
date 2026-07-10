@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relationship Initialization System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Kantumruy Pro', sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle, #220917 0%, #070205 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            padding: 40px 20px;
+        }
+
+        /* ផ្ទៃខាងក្រោយភាគល្អិតបេះដូងអណ្តែត */
+        .hearts-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0; left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ចំណងជើងផ្លូវការបែបប្រព័ន្ធបច្ចេកវិទ្យា */
+        .system-header {
+            text-align: center;
+            z-index: 1;
+            margin-bottom: 35px;
+        }
+
+        .system-header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #ff007f, #ff758c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255, 0, 127, 0.3);
+            letter-spacing: 3px;
+        }
+
+        .system-header p {
+            color: #cca3b1;
+            font-size: 1.1rem;
+            margin-top: 8px;
+            letter-spacing: 1px;
+            font-weight: 400;
+        }
+
+        /* ផ្ទាំងគ្រប់គ្រងទិន្នន័យ (Control Panel) */
+        .control-panel {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 40px;
+            z-index: 1;
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            gap: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+
+        .input-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            color: #ffb3c6;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group input {
+            padding: 12px 15px;
+            background: rgba(15, 3, 10, 0.8);
+            border: 1px solid #73224b;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .input-group input:focus {
+            border-color: #ff007f;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.25);
+        }
+
+        /* ប្លុកបង្ហាញព័ត៌មានគូស្នេហ៍ (Connection Hub) */
+        .connection-hub {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            z-index: 1;
+            width: 100%;
+            max-width: 1000px;
+            margin-bottom: 45px;
+        }
+
+        /* កាតទិន្នន័យបុគ្គល (Profile Card) */
+        .profile-card {
+            background: rgba(30, 12, 22, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px 30px;
+            width: 320px;
+            text-align: center;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .profile-male { 
+            border-left: 4px solid #00d2ff; 
+            box-shadow: 0 10px 30px rgba(0, 210, 255, 0.05); 
+        }
+        .profile-male:hover { 
+            box-shadow: 0 15px 35px rgba(0, 210, 255, 0.25); 
+            transform: translateY(-5px); 
+        }
+
+        .profile-female { 
+            border-left: 4px solid #ff007f; 
+            box-shadow: 0 10px 30px rgba(255, 0, 127, 0.05); 
+        }
+        .profile-female:hover { 
+            box-shadow: 0 15px 35px rgba(255, 0, 127, 0.25); 
+            transform: translateY(-5px); 
+        }
+
+        /* និមិត្តសញ្ញា Profile */
+        .sys-avatar {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.02);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3.2rem;
+            border: 2px solid;
+        }
+        .profile-male .sys-avatar { border-color: rgba(0, 210, 255, 0.3); text-shadow: 0 0 10px rgba(0, 210, 255, 0.5); }
+        .profile-female .sys-avatar { border-color: rgba(255, 0, 127, 0.3); text-shadow: 0 0 10px rgba(255, 0, 127, 0.5); }
+
+        .type-tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 30px;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 18px;
+            letter-spacing: 0.5px;
+        }
+        .profile-male .type-tag { background: rgba(0, 210, 255, 0.1); color: #00d2ff; }
+        .profile-female .type-tag { background: rgba(255, 0, 127, 0.1); color: #ff007f; }
+
+        .user-name {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+            min-height: 38px;
+            word-wrap: break-word;
+        }
+
+        .status-message { 
+            font-size: 0.9rem; 
+            color: #e0b3c2; 
+            line-height: 1.5;
+        }
+
+        /* ស្នូលតភ្ជាប់ (Connection Core) */
+        .connection-core {
+            font-size: 3rem;
+            animation: pulseCore 1s infinite alternate ease-in-out;
+            text-shadow: 0 0 25px #ff007f;
+        }
+
+        @keyframes pulseCore {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.12); opacity: 1; }
+        }
+
+        /* ប៊ូតុងដំណើរការប្រព័ន្ធ */
+        .execute-btn {
+            padding: 16px 50px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(45deg, #ff007f, #ff4b91);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            z-index: 1;
+            box-shadow: 0 5px 30px rgba(255, 0, 127, 0.35);
+            transition: all 0.3s;
+            letter-spacing: 1px;
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+        }
+
+        .execute-btn:hover {
+            transform: scale(1.03) translateY(-2px);
+            box-shadow: 0 8px 40px rgba(255, 0, 127, 0.6);
+        }
+
+        /* ផ្ទាំងបញ្ជាក់លទ្ធផលប្រព័ន្ធ (System Modal Overlay) */
+        .sys-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(8, 2, 6, 0.97);
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            padding: 20px;
+        }
+
+        .sys-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .dialog-box {
+            text-align: center;
+            max-width: 550px;
+            width: 100%;
+            padding: 45px 25px;
+            background: rgba(20, 5, 14, 0.8);
+            border: 1px solid #ff007f;
+            border-radius: 20px;
+            box-shadow: 0 0 60px rgba(255, 0, 127, 0.3);
+            transform: scale(0.85);
+            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .sys-overlay.active .dialog-box { transform: scale(1); }
+
+        .dialog-box h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: #ff007f;
+            margin-bottom: 25px;
+            text-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+            letter-spacing: 1px;
+        }
+
+        .proposal-text { font-size: 1.15rem; line-height: 1.8; margin-bottom: 35px; color: #fff; word-wrap: break-word; }
+
+        .action-options { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+
+        .btn-confirm {
+            padding: 14px 40px; background: #ff007f; color: white; border: none;
+            border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            max-width: 250px;
+        }
+        .btn-confirm:hover { transform: scale(1.05); background: #ff4b91; box-shadow: 0 0 15px rgba(255,0,127,0.4); }
+
+        /* ប៊ូតុងរត់គេចចៀសវាងការបដិសេធ */
+        .btn-reject {
+            padding: 14px 40px; background: #331422; color: #cca3b1; border: 1px solid #59203c;
+            border-radius: 10px; font-size: 1.1rem; cursor: pointer; position: relative;
+            transition: all 0.2s ease;
+            width: 100%;
+            max-width: 250px;
+        }
+
+        /* ប៊ូតុង RESTART STYLE CYBERPUNK NEON GLOW */
+        .btn-restart {
+            margin-top: 25px;
+            padding: 12px 35px;
+            font-family: 'Orbitron', 'Kantumruy Pro', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #ff007f;
+            background: transparent;
+            border: 2px solid #ff007f;
+            border-radius: 30px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.2), inset 0 0 10px rgba(255, 0, 127, 0.1);
+            width: 100%;
+            max-width: 250px;
+        }
+
+        .btn-restart:hover {
+            color: #fff;
+            background: #ff007f;
+            border-color: #ff758c;
+            box-shadow: 0 0 25px rgba(255, 0, 127, 0.8), 0 0 10px rgba(255, 117, 140, 0.5);
+            transform: scale(1.05);
+            text-shadow: 0 0 5px #fff;
+        }
+
+        .btn-restart:active {
+            transform: scale(0.98);
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);
+        }
+
+        /* ----------------------------------------------------
+           📱 ផ្នែកបន្ថែមដើម្បីគាំទ្រអេក្រង់ទូរស័ព្ទគ្រប់ប្រភេទ (Responsive Media Queries) 📱
+        ---------------------------------------------------- */
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 15px;
+            }
+
+            .system-header h1 {
+                font-size: 1.8rem;
+                letter-spacing: 1.5px;
+            }
+
+            .system-header p {
+                font-size: 0.95rem;
+            }
+
+            .control-panel {
+                flex-direction: column; /* ប្តូរមកជាជួរឈរវិញលើទូរស័ព្ទ */
+                gap: 15px;
+                padding: 18px;
+            }
+
+            .connection-hub {
+                flex-direction: column; /* ឱ្យកាតបុរសនិងនារីរត់ចុះមកក្រោមជួរឈរដើម្បីកុំឱ្យហៀរអេក្រង់ */
+                gap: 20px;
+                margin-bottom: 35px;
+            }
+
+            .profile-card {
+                width: 100%; /* រីកពេញអេក្រង់ទូរស័ព្ទ */
+                max-width: 340px;
+                padding: 30px 20px;
+            }
+
+            .connection-core {
+                font-size: 2.5rem;
+                margin: 5px 0;
+            }
+
+            .execute-btn {
+                font-size: 1.05rem;
+                padding: 14px 30px;
+            }
+
+            .dialog-box {
+                padding: 30px 20px;
+            }
+
+            .dialog-box h2 {
+                font-size: 1.5rem;
+                margin-bottom: 15px;
+            }
+
+            .proposal-text {
+                font-size: 1rem;
+                line-height: 1.6;
+                margin-bottom: 25px;
+            }
+
+            .action-options {
+                flex-direction: column; /* ប៊ូតុង Accept និង Reject រៀបជួរឈរលើទូរស័ព្ទ */
+                align-items: center;
+                gap: 12px;
+            }
+
+            .btn-confirm, .btn-reject, .btn-restart {
+                max-width: 100%; /* ឱ្យប៊ូតុងរីកធំស្រួលចុចលើទូរស័ព្ទ */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hearts-bg" id="heartsContainer"></div>
+
+    <div class="system-header">
+        <h1>LOVE INITIALIZATION SYSTEM</h1>
+        <p>ប្រព័ន្ធឌីជីថលសម្រាប់វិភាគ និងតភ្ជាប់ចំណងស្នេហ៍</p>
+    </div>
+
+    <div class="control-panel">
+        <div class="input-group">
+            <label for="inputMale">គណនីបុរស (Sender)</label>
+            <input type="text" id="inputMale" value="" oninput="syncData()" placeholder="បញ្ចូលឈ្មោះបុរស...">
+        </div>
+        <div class="input-group">
+            <label for="inputFemale">គណនីនារី (Receiver)</label>
+            <input type="text" id="inputFemale" value="" oninput="syncData()" placeholder="បញ្ចូលឈ្មោះនារី...">
+        </div>
+    </div>
+
+    <div class="connection-hub">
+        <div class="profile-card profile-male">
+            <div class="sys-avatar">👦🏻</div>
+            <div class="type-tag">Sender Profile</div>
+            <div class="user-name" id="displayMale">Sender</div>
+            <div class="status-message">« ម្ចាស់គណនីផ្ញើសារសុំភ្ជាប់និស្ស័យស្នេហ៍ដ៏ស្មោះស្ម័គ្រ »</div>
+        </div>
+
+        <div class="connection-core">💞</div>
+
+        <div class="profile-card profile-female">
+            <div class="sys-avatar">👩🏻</div>
+            <div class="type-tag">Receiver Profile</div>
+            <div class="user-name" id="displayFemale">Receiver</div>
+            <div class="status-message">« ម្ចាស់ដួងចិត្តដែលប្រព័ន្ធកំពុងស្វែងរកការអនុញ្ញាត »</div>
+        </div>
+    </div>
+
+    <button class="execute-btn" onclick="executeSystem()">INITIALIZE PROPOSAL</button>
+
+    <div class="sys-overlay" id="sysOverlay">
+        <div class="dialog-box" id="dialogBox"></div>
+    </div>
+
+    <script>
+        // មុខងារសមគំនិតទិន្នន័យ Real-time
+        function syncData() {
+            let maleName = document.getElementById("inputMale").value.trim();
+            let femaleName = document.getElementById("inputFemale").value.trim();
+
+            document.getElementById("displayMale").innerText = maleName ? maleName : "Sender";
+            document.getElementById("displayFemale").innerText = femaleName ? femaleName : "Receiver";
+        }
+
+        // មុខងារកំណត់ទម្រង់ប្រអប់សន្ទនាដើម (Default Access Request Form)
+        function renderDefaultDialog() {
+            let maleName = document.getElementById("displayMale").innerText;
+            let femaleName = document.getElementById("displayFemale").innerText;
+            let dialogBox = document.getElementById("dialogBox");
+
+            dialogBox.innerHTML = `
+                <h2>⚠️ ACCESS REQUEST ⚠️</h2>
+                <div class="proposal-text">
+                    ប្រព័ន្ធបានទទួលសំណើរសុំភ្ជាប់ទំនាក់ទំនងពីលោក <span style="color: #00d2ff; font-weight: bold;">${maleName}</span> ផ្ញើជូន កញ្ញា <span style="color: #ff007f; font-weight: bold;">${femaleName}</span>!<br><br>
+                    <span style="color: #ffccd5; font-size: 1.1rem; font-style: italic;">"តើលោកស្រីមានឆន្ទៈក្នុងការបើកសិទ្ធិដំណើរការប្រព័ន្ធបេះដូង រួមរស់ជាគូអនាគតជាមួយបុរសម្នាក់នេះដែរឬទេ?"</span>
+                </div>
+                <div class="action-options">
+                    <button class="btn-confirm" onclick="confirmConnection()">យល់ព្រមទទួលយក (Accept) ❤️</button>
+                    <button class="btn-reject" id="rejectBtn" onmouseover="rerouteButton()" ontouchstart="rerouteButton()">បដិសេធ (Reject)</button>
+                </div>
+            `;
+        }
+
+        // ដំណើរការបញ្ជូនសារភាពស្នេហ៍
+        function executeSystem() {
+            renderDefaultDialog();
+            document.getElementById("sysOverlay").classList.add("active");
+        }
+
+        // មុខងាររុញប៊ូតុងបដិសេធចេញ (រត់គេចមិនឱ្យចុច) - បានបន្ថែម ontouchstart សម្រាប់ទូរស័ព្ទ
+        function rerouteButton() {
+            let rejectBtn = document.getElementById("rejectBtn");
+            let x = Math.random() * 120 - 60; 
+            let y = Math.random() * 120 - 60;
+            rejectBtn.style.transform = `translate(${x}px, ${y}px)`;
+        }
+
+        // ពេលប្រព័ន្ធទទួលបានការយល់ព្រម (Success State)
+        function confirmConnection() {
+            let maleName = document.getElementById("displayMale").innerText;
+            let femaleName = document.getElementById("displayFemale").innerText;
+            let dialogBox = document.getElementById("dialogBox");
+            
+            dialogBox.innerHTML = `
+                <h2 style="font-size: 1.8rem; color: #ff007f; font-family: 'Orbitron', sans-serif;">🔒 CONNECTION ESTABLISHED 🔒</h2>
+                <div class="proposal-text" style="font-size: 1.2rem; color: #fff;">
+                    ការតភ្ជាប់បានជោគជ័យជាស្ថាពរ! 💞<br><br>
+                    គណនី <span style="color: #00d2ff; font-weight:bold;">${maleName}</span> និង <br>
+                    គណនី <span style="color: #ff007f; font-weight:bold;">${femaleName}</span> <br><br>
+                    ត្រូវបានចងភ្ជាប់ជា <span style="color: #ff4b91; font-weight:bold;">"គូស្នេហ៍ផ្លូវការ"</span> នៅក្នុងប្រព័ន្ធជីវិតចាប់ពីពេលនេះតទៅ។
+                </div>
+                <p style="font-size: 2.5rem; animation: pulseCore 0.4s infinite alternate;">💖✨🔒</p>
+                <button class="btn-restart" onclick="resetSystem()">Restart System 🔄</button>
+            `;
+            
+            // បង្កើតចលនាបេះដូងរត់ឡើងលើ
+            for(let i=0; i<35; i++) {
+                triggerHeartEffect();
+            }
+        }
+
+        // មុខងារបិទ Overlay ដើម្បីដំណើរការឡើងវិញ
+        function resetSystem() {
+            document.getElementById("sysOverlay").classList.remove("active");
+        }
+
+        function triggerHeartEffect() {
+            let container = document.getElementById("heartsContainer");
+            let heart = document.createElement("div");
+            heart.innerHTML = "❤️";
+            heart.style.position = "absolute";
+            heart.style.left = Math.random() * 100 + "vw";
+            heart.style.top = "100vh";
+            heart.style.fontSize = Math.random() * 20 + 15 + "px";
+            heart.style.opacity = Math.random();
+            heart.style.transition = "transform " + (Math.random() * 3 + 2) + "s ease-out, opacity 2s";
+            
+            container.appendChild(heart);
+
+            setTimeout(() => {
+                heart.style.transform = `translateY(-110vh) scale(1.4)`;
+                heart.style.opacity = "0";
+            }, 100);
+
+            setTimeout(() => { heart.remove(); }, 5000);
+        }
+    </script>
+</body>
+</html>
